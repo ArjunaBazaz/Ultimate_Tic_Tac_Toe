@@ -1,19 +1,26 @@
-# issues: Change Global board, don't place in done board, favorability
+# issues: Change Global overallBoard, don't place in done overallBoard, favorability
 import copy
 import board as gameState
 import nextMove as computerThink
 
 nextMoves = {}
-board = "........."
-totalBoard = ["", "", "", "", "", "", "", "", ""]
+overallBoard = "........."
+allBoards = [".........", ".........", ".........", ".........", ".........", ".........", ".........", ".........", "........."]
 player = ""
 computer = ""
-
-for x in range(0, 9):
-    totalBoard[x] = "........."
+NO_BOARD_VALUE = -1
+IS_FINISHED_RESULT_X = 1
+IS_FINISHED_RESULT_O = -1
+IS_FINISHED_RESULT_DRAW = 0
+IS_FINISHED_RESULT_INDEX = 1
+IS_FINISHED_OVER_YET_INDEX = 0
+MOVE_PLAYED_OVERALL_BOARD_INDEX = 0
+MOVE_PLAYED_ALL_BOARDS_INDEX = 1
+MOVE_PLAYED_BOARD_TO_PLAY_INDEX = 2
+COMPUTER_DEPTH = 4
 
 first = input("Who goes first (computer/player): ")
-if (first == "computer"):
+if first == "computer":
     player = "X"
     computer = "O"
 else:
@@ -21,39 +28,43 @@ else:
     computer = "X"
 
 goesNext = "X"
-nextIndex = -1
-while (("." in board) and (gameState.isFinished(board)[0] == False)):
-    gameState.printBoard(board, totalBoard)
+boardToPlay = NO_BOARD_VALUE
+while not gameState.isFinished(overallBoard)[IS_FINISHED_OVER_YET_INDEX]:
+    gameState.printBoard(overallBoard, allBoards)
     print("")
-    if (goesNext == player):
+    if goesNext == player:
         print("computer's turn")
-        temp = computerThink.maxMove(copy.copy(board), copy.copy(totalBoard), nextIndex, 3)
-        board = temp[0]
-        totalBoard = temp[1]
-        nextIndex = temp[2]
+        movePlayed = computerThink.maxMove(copy.copy(overallBoard), copy.copy(allBoards), boardToPlay, COMPUTER_DEPTH, player)
+        overallBoard = movePlayed[MOVE_PLAYED_OVERALL_BOARD_INDEX]
+        allBoards = movePlayed[MOVE_PLAYED_ALL_BOARDS_INDEX]
+        boardToPlay = movePlayed[MOVE_PLAYED_BOARD_TO_PLAY_INDEX]
         goesNext = computer
         print("")
     else:
-        if (nextIndex == -1):
-            nextIndex = int(input("Which board whould you like you like to play: "))
-        print("your turn in board:", nextIndex)
-        index = int(input("Where do you play (0-8): "))
-        if (totalBoard[nextIndex][index] != "."):
+        if boardToPlay == NO_BOARD_VALUE:
+            boardToPlay = int(input("Which overallBoard would you like you like to play: "))
+        if overallBoard[boardToPlay] != ".":
+            print("board already won")
+            print("")
+            continue
+        print("your turn in overallBoard:", boardToPlay)
+        positionPlayed = int(input("Where do you play (0-8): "))
+        if allBoards[boardToPlay][positionPlayed] != ".":
             print("cant play there")
             print("")
             continue
-        z = board.move(board, totalBoard, nextIndex, computer, index)
-        board = z[0]
-        totalBoard = z[1]
-        nextIndex = z[2]
+        movePlayed = gameState.move(overallBoard, allBoards, boardToPlay, computer, positionPlayed)
+        overallBoard = movePlayed[MOVE_PLAYED_OVERALL_BOARD_INDEX]
+        allBoards = movePlayed[MOVE_PLAYED_ALL_BOARDS_INDEX]
+        boardToPlay = movePlayed[MOVE_PLAYED_BOARD_TO_PLAY_INDEX]
         goesNext = player
     print("_________________")
     print("")
-board.printBoard(board, totalBoard)
-x = board.isFinished(board)
-if (x[1] == 0):
+overallBoard.printBoard(overallBoard, allBoards)
+finalResults = overallBoard.isFinished(overallBoard)
+if finalResults[IS_FINISHED_RESULT_INDEX] == IS_FINISHED_RESULT_DRAW:
     print("draw")
-if (x[1] == 1):
+if finalResults[IS_FINISHED_RESULT_INDEX] == IS_FINISHED_RESULT_X:
     print("X wins")
-if (x[1] == -1):
+if finalResults[IS_FINISHED_RESULT_INDEX] == IS_FINISHED_RESULT_O:
     print("O wins")
