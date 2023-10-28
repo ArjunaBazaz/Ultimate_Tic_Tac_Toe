@@ -19,8 +19,8 @@ MOVE_PLAYED_ALL_BOARDS_INDEX = 1
 MOVE_PLAYED_BOARD_TO_PLAY_INDEX = 2
 COMPUTER_1_DEPTH = 3
 COMPUTER_2_DEPTH = 3
-COMPUTER_1_METHOD = 1
-COMPUTER_2_METHOD = 2
+COMPUTER_1_METHOD = 2
+COMPUTER_2_METHOD = 1
 
 first = input("Which computer goes first (1/2): ")
 if first == "1":
@@ -34,6 +34,7 @@ goesNext = "X"
 boardToPlay = NO_BOARD_VALUE
 while not gameState.isFinished(overallBoard)[IS_FINISHED_OVER_YET_INDEX]:
     gameState.printBoard(overallBoard, allBoards)
+    print(computerThink.favorability(overallBoard, allBoards, 2))
     print("")
     if goesNext == computer_1:
         movePlayed = computerThink.maxMove(copy.copy(overallBoard), copy.copy(allBoards), boardToPlay, COMPUTER_1_DEPTH, computer_1, COMPUTER_1_METHOD)
