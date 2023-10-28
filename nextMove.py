@@ -8,120 +8,83 @@ IS_FINISHED_OVER_YET_INDEX = 0
 MOVE_PLAYED_OVERALL_BOARD_INDEX = 0
 MOVE_PLAYED_ALL_BOARDS_INDEX = 1
 MOVE_PLAYED_BOARD_TO_PLAY_INDEX = 2
+A = 20
+B = 1
+C = 5
+D = 1
+E1 = 1000
+F1 = 1
+G1 = 25
+H1 = 1
+E2 = 1000
+F2 = 1
+G2 = 35
+H2 = 1
 
 def scoreBoard(currentBoard):
     XScore = 0
     OScore = 0
     finished = gameState.isFinished(currentBoard)
     if finished[IS_FINISHED_OVER_YET_INDEX]:
-        return 20 * finished[IS_FINISHED_RESULT_INDEX]
+        return A * finished[IS_FINISHED_RESULT_INDEX]
     for x in range(0, 9):
         if currentBoard[x] == 'X':
-            XScore = XScore + 1
+            XScore = XScore + B
         elif currentBoard[x] == 'O':
-            OScore = OScore + 1
+            OScore = OScore + B
         else:
             tempBoard = currentBoard[0:x] + "X" + currentBoard[x + 1:]
             if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                XScore = XScore + 5
+                XScore = XScore + C
             tempBoard = currentBoard[0:x] + "O" + currentBoard[x + 1:]
             if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                OScore = OScore + 5
+                OScore = OScore + C
         if x == 4:
             if currentBoard[x] == 'X':
-                XScore = XScore + 1
+                XScore = XScore + D
             elif currentBoard[x] == 'O':
-                OScore = OScore + 1
+                OScore = OScore + D
     return XScore - OScore
 
 def favorability2(currentBoard, currentTotalBoard):     #fix the line when it checks if adding an X or O would make a change to the game state
     totalScore = 0
     finished = gameState.isFinished(currentBoard)
     if finished[IS_FINISHED_OVER_YET_INDEX]:
-        return 1000 * scoreBoard(currentBoard)
+        return E1 * scoreBoard(currentBoard)
     for x in range(0, 9):
-        totalScore = totalScore + scoreBoard(currentTotalBoard[x])
-        if gameState.isFinished(currentBoard[0:x] + "X" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX] and gameState.isFinished(currentBoard[0:x] + "O" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX]:
-            totalScore = totalScore + 3*scoreBoard(currentTotalBoard[x])
+        totalScore = totalScore + F1 * scoreBoard(currentTotalBoard[x])
+        if(gameState.isFinished(currentTotalBoard[x])[IS_FINISHED_OVER_YET_INDEX]):
+            continue
+        elif gameState.isFinished(currentBoard[0:x] + "X" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore + G1 * (2 ** (scoreBoard(currentTotalBoard[x]) / 20))
+        elif gameState.isFinished(currentBoard[0:x] + "O" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore - G1 * (2 ** (scoreBoard(currentTotalBoard[x]) / 20))
         if x == 4:
-            totalScore = totalScore + scoreBoard(currentTotalBoard[x])
+            totalScore = totalScore + H1 * scoreBoard(currentTotalBoard[x])
     return totalScore
 
 def favorability1(currentBoard, currentTotalBoard):  # FINISH FAVORABILITY
-    XScore = 0
-    OScore = 0
     totalScore = 0
     finished = gameState.isFinished(currentBoard)
     if finished[IS_FINISHED_OVER_YET_INDEX]:
-        return 10000 * finished[IS_FINISHED_RESULT_INDEX]
+        return E2 * scoreBoard(currentBoard)
     for x in range(0, 9):
-        if currentBoard[x] == 'X':
-            XScore = XScore + 40
-            if x % 3 < 2 and currentBoard[x + 1] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 1])
-            elif x % 3 != 0 and currentBoard[x - 1] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 1])
-            elif x < 6 and currentBoard[x + 3] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 3])
-            elif x > 2 and currentBoard[x - 3] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 3])
-            elif x % 3 < 2 and x < 6 and currentBoard[x + 4] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 4])
-            elif x % 3 != 0 and x > 2 and currentBoard[x - 4] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 4])
-            elif x % 3 != 0 and x < 6 and currentBoard[x + 2] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 2])
-            elif x % 3 < 2 and x > 2 and currentBoard[x - 2] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 2])
-        elif currentBoard[x] == 'O':
-            OScore = OScore + 40
-            if x % 3 < 2 and currentBoard[x + 1] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 1])
-            elif x % 3 != 0 and currentBoard[x - 1] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 1])
-            elif x < 6 and currentBoard[x + 3] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 3])
-            elif x > 2 and currentBoard[x - 3] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 3])
-            elif x % 3 < 2 and x < 6 and currentBoard[x + 4] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 4])
-            elif x % 3 != 0 and x > 2 and currentBoard[x - 4] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 4])
-            elif x % 3 != 0 and x < 6 and currentBoard[x + 2] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x + 2])
-            elif x % 3 < 2 and x != 2 and currentBoard[x - 2] == ".":
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x - 2])
-        else:
-            tempBoard = currentBoard[0:x] + "X" + currentBoard[x + 1:]
-            if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                XScore = XScore + 100
-                totalScore = totalScore + 4 * scoreBoard(currentTotalBoard[x])
-            tempBoard = currentBoard[0:x] + "O" + currentBoard[x + 1:]
-            if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                OScore = OScore + 100
-                totalScore = totalScore + 4 * scoreBoard(currentTotalBoard[x])
-            totalScore = totalScore + scoreBoard(currentTotalBoard[x])
-        if x == 0 or x == 2 or x == 6 or x == 8:
-            if currentBoard[x] == 'X':
-                XScore = XScore + 10
-            elif currentBoard[x] == 'O':
-                OScore = OScore + 10
-            else:
-                totalScore = totalScore + scoreBoard(currentTotalBoard[x])
+        totalScore = totalScore + F2 * scoreBoard(currentTotalBoard[x])
+        if(gameState.isFinished(currentTotalBoard[x])[IS_FINISHED_OVER_YET_INDEX]):
+            continue
+        elif gameState.isFinished(currentBoard[0:x] + "X" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore + G2 * (2 ** (scoreBoard(currentTotalBoard[x]) / 20))
+        elif gameState.isFinished(currentBoard[0:x] + "O" + currentBoard[x + 1:])[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore - G2 * (2 ** (scoreBoard(currentTotalBoard[x]) / 20))
         if x == 4:
-            if currentBoard[x] == 'X':
-                XScore = XScore + 25
-            elif currentBoard[x] == 'O':
-                OScore = OScore + 25
-            else:
-                totalScore = totalScore + 2 * scoreBoard(currentTotalBoard[x])
-    return totalScore + XScore - OScore
+            totalScore = totalScore + H2 * scoreBoard(currentTotalBoard[x])
+    return totalScore
 
 def favorability(currentBoard, currentTotalBoard, method):
     if method == 1:
-        return favorability1(currentBoard, currentTotalBoard)*(random.random()/20 + 0.975)
+        return favorability1(currentBoard, currentTotalBoard)*(random.random()/100 + 0.995)
     else:
-        return favorability2(currentBoard, currentTotalBoard)*(random.random()/20 + 0.975)
+        return favorability2(currentBoard, currentTotalBoard)*(random.random()/100 + 0.995)
 
 
 def max_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, player, method):  # Whatif no moves available
