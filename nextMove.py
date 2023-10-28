@@ -1,3 +1,4 @@
+import random
 import copy
 import board as gameState
 
@@ -12,50 +13,51 @@ def scoreBoard(currentBoard):
     XScore = 0
     OScore = 0
     finished = gameState.isFinished(currentBoard)
-    if finished[IS_FINISHED_OVER_YET_INDEX] == True:
-        return 20 * finished[IS_FINISHED_RESULT_INDEX]
+    if finished[IS_FINISHED_OVER_YET_INDEX]:
+        return 50 * finished[IS_FINISHED_RESULT_INDEX]
     for x in range(0, 9):
         if currentBoard[x] == 'X':
-            XScore = XScore + 2
+            XScore = XScore + 4
         elif currentBoard[x] == 'O':
-            OScore = OScore + 2
+            OScore = OScore + 4
         else:
             tempBoard = currentBoard[0:x] + "X" + currentBoard[x + 1:]
             if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                XScore = XScore + 4
+                XScore = XScore + 6
             tempBoard = currentBoard[0:x] + "O" + currentBoard[x + 1:]
             if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
-                OScore = OScore + 4
+                OScore = OScore + 6
         if x == 4:
             if currentBoard[x] == 'X':
-                XScore = XScore + 1
+                XScore = XScore + 2
             elif currentBoard[x] == 'O':
-                OScore = OScore + 1
+                OScore = OScore + 2
     return XScore - OScore
 
-
 def favorability2(currentBoard, currentTotalBoard):
-    XScore = 0
-    OScore = 0
-    totalScore = 0
-    indicies = {}
-    finished = gameState.isFinished(currentBoard)
-    if finished[IS_FINISHED_OVER_YET_INDEX]:
-        return 1000 * finished[IS_FINISHED_RESULT_INDEX]
-    for x in range(0, 9):
-        indicies[x] = scoreBoard(currentTotalBoard[x])
-    for x in range(0, 9):
-        totalScore = totalScore + indicies[x]
-    return totalScore + XScore - OScore
-
-
-def favorability(currentBoard, currentTotalBoard):  # FINISH FAVORABILITY
-    XScore = 0
-    OScore = 0
     totalScore = 0
     finished = gameState.isFinished(currentBoard)
     if finished[IS_FINISHED_OVER_YET_INDEX]:
-        return 1000 * finished[IS_FINISHED_RESULT_INDEX]
+        return 50 * finished[IS_FINISHED_RESULT_INDEX]
+    for x in range(0, 9):
+        totalScore = totalScore + scoreBoard(currentTotalBoard[x])
+        tempBoard = currentBoard[0:x] + "X" + currentBoard[x + 1:]
+        if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore + 2*scoreBoard(currentTotalBoard[x])
+        tempBoard = currentBoard[0:x] + "O" + currentBoard[x + 1:]
+        if gameState.isFinished(tempBoard)[IS_FINISHED_OVER_YET_INDEX]:
+            totalScore = totalScore + 2*scoreBoard(currentTotalBoard[x])
+        if x == 4:
+            totalScore = totalScore + scoreBoard(currentTotalBoard[x])
+    return totalScore
+
+def favorability1(currentBoard, currentTotalBoard):  # FINISH FAVORABILITY
+    XScore = 0
+    OScore = 0
+    totalScore = 0
+    finished = gameState.isFinished(currentBoard)
+    if finished[IS_FINISHED_OVER_YET_INDEX]:
+        return 10000 * finished[IS_FINISHED_RESULT_INDEX]
     for x in range(0, 9):
         if currentBoard[x] == 'X':
             XScore = XScore + 40
@@ -119,15 +121,21 @@ def favorability(currentBoard, currentTotalBoard):  # FINISH FAVORABILITY
                 totalScore = totalScore + 2 * scoreBoard(currentTotalBoard[x])
     return totalScore + XScore - OScore
 
+def favorability(currentBoard, currentTotalBoard, method):
+    if method == 1:
+        return favorability1(currentBoard, currentTotalBoard)
+    else:
+        return favorability2(currentBoard, currentTotalBoard)
 
-def max_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, player):  # Whatif no moves available
+
+def max_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, player, method):  # Whatif no moves available
     finished = gameState.isFinished(currentBoard)
     results = []
     if depth == 0 or finished[IS_FINISHED_OVER_YET_INDEX]:
         if player == "X":
-            return favorability(copy.copy(currentBoard), currentTotalBoard)
+            return favorability(copy.copy(currentBoard), currentTotalBoard, method)
         else:
-            return (-1) * favorability(copy.copy(currentBoard), currentTotalBoard)
+            return (-1) * favorability(copy.copy(currentBoard), currentTotalBoard, method)
     moves = []
     if position == NO_BOARD_VALUE:
         for x in range(0, 9):
@@ -141,7 +149,7 @@ def max_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, play
         return min_step(copy.copy(currentBoard), copy.copy(currentTotalBoard), -1, depth - 1, alpha, beta, player)
     for nextIndex in moves:
         toMove = gameState.move(copy.copy(currentBoard), copy.copy(currentTotalBoard), nextIndex[1], player, nextIndex[0])
-        min = min_step(toMove[MOVE_PLAYED_OVERALL_BOARD_INDEX], toMove[MOVE_PLAYED_ALL_BOARDS_INDEX], toMove[MOVE_PLAYED_BOARD_TO_PLAY_INDEX], depth - 1, alpha, beta, player)
+        min = min_step(toMove[MOVE_PLAYED_OVERALL_BOARD_INDEX], toMove[MOVE_PLAYED_ALL_BOARDS_INDEX], toMove[MOVE_PLAYED_BOARD_TO_PLAY_INDEX], depth - 1, alpha, beta, player, method)
         results.append(min)
         if min > alpha:
             alpha = min
@@ -151,14 +159,14 @@ def max_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, play
         return max(results)
 
 
-def min_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, player):
+def min_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, player, method):
     finished = gameState.isFinished(currentBoard)
     results = []
     if depth == 0 or finished[IS_FINISHED_OVER_YET_INDEX]:
         if player == "X":
-            return favorability(copy.copy(currentBoard), currentTotalBoard)
+            return favorability(copy.copy(currentBoard), currentTotalBoard, method)
         else:
-            return (-1) * favorability(copy.copy(currentBoard), currentTotalBoard)
+            return (-1) * favorability(copy.copy(currentBoard), currentTotalBoard, method)
     if player == 'X':
         them = 'O'
     else:
@@ -176,7 +184,7 @@ def min_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, play
         return max_step(copy.copy(currentBoard), copy.copy(currentTotalBoard), -1, depth - 1, alpha, beta, player)
     for nextIndex in moves:
         toMove = gameState.move(copy.copy(currentBoard), copy.copy(currentTotalBoard), nextIndex[1], them, nextIndex[0])
-        max = max_step(toMove[MOVE_PLAYED_OVERALL_BOARD_INDEX], toMove[MOVE_PLAYED_ALL_BOARDS_INDEX], toMove[MOVE_PLAYED_BOARD_TO_PLAY_INDEX], depth - 1, alpha, beta, player)
+        max = max_step(toMove[MOVE_PLAYED_OVERALL_BOARD_INDEX], toMove[MOVE_PLAYED_ALL_BOARDS_INDEX], toMove[MOVE_PLAYED_BOARD_TO_PLAY_INDEX], depth - 1, alpha, beta, player, method)
         results.append(max)
         if max < beta:
             beta = max
@@ -185,7 +193,7 @@ def min_step(currentBoard, currentTotalBoard, position, depth, alpha, beta, play
     if len(results) != 0:
         return min(results)
 
-def maxMove(currentBoard, currentTotalBoard, position, depth, playerXorO):
+def maxMove(currentBoard, currentTotalBoard, position, depth, playerXorO, method):
     player = playerXorO
     alpha = -10000
     beta = 10000
@@ -204,7 +212,7 @@ def maxMove(currentBoard, currentTotalBoard, position, depth, playerXorO):
         nextBoard = toMove[MOVE_PLAYED_OVERALL_BOARD_INDEX]
         nextTotalBoard = toMove[MOVE_PLAYED_ALL_BOARDS_INDEX]
         nextSpot = toMove[MOVE_PLAYED_BOARD_TO_PLAY_INDEX]
-        min = min_step(copy.copy(nextBoard), copy.copy(nextTotalBoard), nextSpot, depth - 1, alpha, beta, player)
+        min = min_step(copy.copy(nextBoard), copy.copy(nextTotalBoard), nextSpot, depth - 1, alpha, beta, player, method)
         toMove = tuple(toMove)
         results[min] = toMove
         if min > alpha:

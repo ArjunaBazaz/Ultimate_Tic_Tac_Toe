@@ -6,8 +6,8 @@ import nextMove as computerThink
 nextMoves = {}
 overallBoard = "........."
 allBoards = [".........", ".........", ".........", ".........", ".........", ".........", ".........", ".........", "........."]
-player = ""
-computer = ""
+computer_1 = ""
+computer_2 = ""
 NO_BOARD_VALUE = -1
 IS_FINISHED_RESULT_X = 1
 IS_FINISHED_RESULT_O = -1
@@ -17,49 +17,36 @@ IS_FINISHED_OVER_YET_INDEX = 0
 MOVE_PLAYED_OVERALL_BOARD_INDEX = 0
 MOVE_PLAYED_ALL_BOARDS_INDEX = 1
 MOVE_PLAYED_BOARD_TO_PLAY_INDEX = 2
-COMPUTER_DEPTH = 3
-COMPUTER_METHOD = 2
+COMPUTER_1_DEPTH = 3
+COMPUTER_2_DEPTH = 3
+COMPUTER_1_METHOD = 1
+COMPUTER_2_METHOD = 2
 
-first = input("Who goes first (computer/player): ")
-if first == "computer":
-    player = "X"
-    computer = "O"
+first = input("Which computer goes first (1/2): ")
+if first == "1":
+    computer_1 = "X"
+    computer_2 = "O"
 else:
-    player = "O"
-    computer = "X"
+    computer_1 = "O"
+    computer_2 = "X"
 
 goesNext = "X"
 boardToPlay = NO_BOARD_VALUE
 while not gameState.isFinished(overallBoard)[IS_FINISHED_OVER_YET_INDEX]:
-    print(computerThink.favorability(overallBoard, allBoards, COMPUTER_METHOD))
     gameState.printBoard(overallBoard, allBoards)
     print("")
-    if goesNext == player:
-        print("computer's turn")
-        movePlayed = computerThink.maxMove(copy.copy(overallBoard), copy.copy(allBoards), boardToPlay, COMPUTER_DEPTH, player, COMPUTER_METHOD)
+    if goesNext == computer_1:
+        movePlayed = computerThink.maxMove(copy.copy(overallBoard), copy.copy(allBoards), boardToPlay, COMPUTER_1_DEPTH, computer_1, COMPUTER_1_METHOD)
         overallBoard = movePlayed[MOVE_PLAYED_OVERALL_BOARD_INDEX]
         allBoards = movePlayed[MOVE_PLAYED_ALL_BOARDS_INDEX]
         boardToPlay = movePlayed[MOVE_PLAYED_BOARD_TO_PLAY_INDEX]
-        goesNext = computer
-        print("")
+        goesNext = computer_2
     else:
-        if boardToPlay == NO_BOARD_VALUE:
-            boardToPlay = int(input("Which overallBoard would you like you like to play: "))
-        if overallBoard[boardToPlay] != ".":
-            print("board already won")
-            print("")
-            continue
-        print("your turn in overallBoard:", boardToPlay)
-        positionPlayed = int(input("Where do you play (0-8): "))
-        if allBoards[boardToPlay][positionPlayed] != ".":
-            print("cant play there")
-            print("")
-            continue
-        movePlayed = gameState.move(overallBoard, allBoards, boardToPlay, computer, positionPlayed)
+        movePlayed = computerThink.maxMove(copy.copy(overallBoard), copy.copy(allBoards), boardToPlay, COMPUTER_2_DEPTH, computer_2, COMPUTER_2_METHOD)
         overallBoard = movePlayed[MOVE_PLAYED_OVERALL_BOARD_INDEX]
         allBoards = movePlayed[MOVE_PLAYED_ALL_BOARDS_INDEX]
         boardToPlay = movePlayed[MOVE_PLAYED_BOARD_TO_PLAY_INDEX]
-        goesNext = player
+        goesNext = computer_1
     print("_________________")
     print("")
 gameState.printBoard(overallBoard, allBoards)
